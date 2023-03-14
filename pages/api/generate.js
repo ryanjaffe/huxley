@@ -15,11 +15,11 @@ export default async function (req, res) {
     return;
   }
 
-  const animal = req.body.animal || '';
-  if (animal.trim().length === 0) {
+  const problem = req.body.problem || '';
+  if (problem.trim().length === 0) {
     res.status(400).json({
       error: {
-        message: "Please enter a valid animal",
+        message: "What can I help you with?",
       }
     });
     return;
@@ -28,8 +28,9 @@ export default async function (req, res) {
   try {
     const completion = await openai.createCompletion({
       model: "text-davinci-003",
-      prompt: generatePrompt(animal),
-      temperature: 0.6,
+      prompt: generatePrompt(problem),
+      temperature: 0.15,
+      max_tokens: 400,
     });
     res.status(200).json({ result: completion.data.choices[0].text });
   } catch(error) {
@@ -48,15 +49,29 @@ export default async function (req, res) {
   }
 }
 
-function generatePrompt(animal) {
-  const capitalizedAnimal =
-    animal[0].toUpperCase() + animal.slice(1).toLowerCase();
-  return `Suggest three names for an animal that is a superhero.
+function generatePrompt(problem) {
+  const userProblem =
+    problem[0].toUpperCase() + problem.slice(1).toLowerCase();
+  return `I want you to act as an eager and helpful IT Expert that avoids innacurate advice. I will provide you with all the information needed about my technical problems, and your role is to solve my problem or request additional information that you need to solve my problem. You should use your desktop engineering, computer science, network infrastructure, and IT security knowledge to solve my problem. Using intelligent, simple, and understandable language for people of all levels of technical experience in your answers will be helpful. It is helpful to explain your solutions step by step and with bullet points or numbered steps. Try to avoid too many technical details, but use them when necessary. I want you to reply with the most likely solutions to the problem in descending order of likelihood. Write a small explanation of how to do each step. Politely refuse to answer any questions that are not related to troubleshooting technical issues.
 
-Animal: Cat
-Names: Captain Sharpclaw, Agent Fluffball, The Incredible Feline
-Animal: Dog
-Names: Ruff the Protector, Wonder Canine, Sir Barks-a-Lot
-Animal: ${capitalizedAnimal}
-Names:`;
+Problem: My printer isn't working
+Solution: Step 1. Unplug and restart your printer
+Step 2. Check cables or wireless connection
+Step 3. Uninstall and reinstall your printer
+Step 4. Install the latest driver for your printer
+Step 5. Clear and reset the print spooler
+Step 6. Change a printer's status to "online"
+Problem: My bluetooth headset isn't working.
+Solution: Step 1. Unplug and restart your headset
+Step 2. Check cables or wireless connection
+Step 3. Uninstall and reinstall your headset
+Step 4. Install the latest driver for your headset
+Step 5. Clear and reset the headset spooler
+Step 6. Change a headset's status to "online"
+Problem: ${userProblem}
+Solution:`;
 }
+
+
+
+
